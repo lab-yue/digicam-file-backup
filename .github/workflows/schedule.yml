@@ -15,5 +15,6 @@ jobs:
           DC_PASSWORD: ${{ secrets.DC_PASSWORD }}
           SLACK_WEB_HOOK: ${{ secrets.SLACK_WEB_HOOK }}
         run: |
-          npm i
-          npm run fs
+          npm i yarn -g
+          yarn
+          yarn fs
