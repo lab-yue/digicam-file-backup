@@ -11,26 +11,28 @@ dotenv.config();
     return fs.status !== "回答済" && new Date(fs.deadline) > now;
   });
 
-  await Promise.all(shouldAnwser.map(fs => digicam.fillFS(fs.url)));
-
-  const fsListAfter = await digicam.getFSList();
-  await digicam.close();
-
-  const answered = fsListAfter.filter(fsAfter => {
-    const fsBefore = fsListBefore.find(
-      fsBefore => fsBefore.url === fsAfter.url
-    );
-    if (fsBefore) {
-      return fsBefore.status !== fsAfter.status;
-    }
-  });
-
   let answeredText = `回答したFSはないようです`;
-  if (answered.length) {
-    answered
-      .map(fs => `${fs.date} ${fs.time} ${fs.subject}のFSを回答したよ`)
-      .join("\n");
-  }
 
+  if (shouldAnwser.length) {
+    await Promise.all(shouldAnwser.map(fs => digicam.fillFS(fs.url)));
+
+    const fsListAfter = await digicam.getFSList();
+    await digicam.close();
+
+    const answered = fsListAfter.filter(fsAfter => {
+      const fsBefore = fsListBefore.find(
+        fsBefore => fsBefore.url === fsAfter.url
+      );
+      if (fsBefore) {
+        return fsBefore.status !== fsAfter.status;
+      }
+    });
+
+    if (answered.length) {
+      answeredText = answered
+        .map(fs => `${fs.date} ${fs.time} ${fs.subject}のFSを回答したよ`)
+        .join("\n");
+    }
+  }
   notify.slack(answeredText);
 })();
