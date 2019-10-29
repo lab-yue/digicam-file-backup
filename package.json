@@ -1,0 +1,24 @@
+{
+  "name": "digicam-auto-fs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:rainy-me/digicam-auto-fs.git",
+  "author": "rainy-me <github@rainy.me>",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "lint": "tslint --project . --fix",
+    "test/login": "ts-node src/api/login.ts"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/node-fetch": "^2.5.2",
+    "@types/puppeteer": "^1.20.2",
+    "apollo-server": "^2.9.7",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.0",
+    "puppeteer": "^2.0.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
+  }
+}

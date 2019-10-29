@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "es2020",
+            "dom"
+        ],
+        "noImplicitAny": true,
+        "allowJs": false,
+        "removeComments": true,
+        "target": "es6",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "noEmit": true,
+    },
+    "include": [
+        "src"
+    ],
+    "rules": {
+        "no-console": false,
+        "interface-name": [
+            true,
+            "never"
+        ]
+    }
+}
