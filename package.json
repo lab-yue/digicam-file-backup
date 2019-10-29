@@ -6,7 +6,7 @@
   "author": "rainy-me <github@rainy.me>",
   "license": "MIT",
   "scripts": {
-    "fs": "ts-node src/index.ts",
+    "fs": "ts-node src/index.ts"
   },
   "dependencies": {
     "@types/dotenv": "^8.2.0",
