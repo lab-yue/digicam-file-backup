@@ -1,5 +1,8 @@
 name: Auto FS
 on:
+  push:
+    branches:
+      - master
   schedule:
     - cron: "0 0,12 * * *"
 jobs:
