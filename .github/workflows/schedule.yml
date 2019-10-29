@@ -1,0 +1,16 @@
+name: Auto FS
+on:
+  schedule:
+    - cron: "0 0,12 * * *"
+jobs:
+  fill-fs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto FS
+        env:
+          DC_NAME: ${{ secrets.DC_NAME }}
+          DC_PASSWORD: ${{ secrets.DC_PASSWORD }}
+          SLACK_WEB_HOOK: ${{ secrets.SLACK_WEB_HOOK }}
+        run: |
+          npm i
+          npm run fs

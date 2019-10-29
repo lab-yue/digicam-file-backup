@@ -6,15 +6,12 @@
   "author": "rainy-me <github@rainy.me>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "lint": "tslint --project . --fix",
-    "test/login": "ts-node src/api/login.ts"
+    "fs": "ts-node src/index.ts",
   },
   "dependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/node-fetch": "^2.5.2",
     "@types/puppeteer": "^1.20.2",
-    "apollo-server": "^2.9.7",
     "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0",
     "puppeteer": "^2.0.0",
