@@ -17,7 +17,7 @@ async function login() {
   }
 
   const browser = await puppeter.launch({
-    headless: false, //true,
+    headless: true,
     args: ["--no-sandbox"]
   });
 
