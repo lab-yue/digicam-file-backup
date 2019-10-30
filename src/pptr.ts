@@ -17,7 +17,7 @@ async function login() {
   }
 
   const browser = await puppeter.launch({
-    headless: true,
+    headless: false, //true,
     args: ["--no-sandbox"]
   });
 
@@ -35,6 +35,7 @@ async function login() {
 
   await page.click(".loginBtn");
   await page.waitForNavigation();
+  console.log(`logining`);
 
   async function exposeHelpers(page: puppeter.Page) {
     await page.evaluate(() => {
@@ -92,6 +93,7 @@ async function login() {
   }
 
   async function getFSList() {
+    console.log(`geting FS List`);
     const page = await browser.newPage();
     await page.goto(URL.FS);
     await exposeHelpers(page);
@@ -115,24 +117,22 @@ async function login() {
         };
       });
     });
-    await page.close();
     return FSList;
   }
 
   async function fillFS(url: string) {
+    console.log(`filling FS`);
     const page = await browser.newPage();
     await page.goto(url);
     await exposeHelpers(page);
     await page.evaluate(() => {
       (window as any).helpers.fillFS();
     });
-    // await page.close();
   }
 
   async function close() {
     await browser.close();
   }
-
   return { browser, getFSList, fillFS, close };
 }
 export default { login, sleep };

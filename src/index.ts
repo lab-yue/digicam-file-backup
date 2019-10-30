@@ -7,17 +7,17 @@ dotenv.config();
   const digicam = await pptr.login();
   const fsListBefore = await digicam.getFSList();
   const now = new Date();
+  console.log(fsListBefore);
   const shouldAnwser = fsListBefore.filter(fs => {
     return fs.status !== "回答済" && new Date(fs.deadline) > now;
   });
 
-  let answeredText = `回答したFSはないようです`;
+  let text = `回答したFSはないようです`;
 
   if (shouldAnwser.length) {
     await Promise.all(shouldAnwser.map(fs => digicam.fillFS(fs.url)));
 
     const fsListAfter = await digicam.getFSList();
-    await digicam.close();
 
     const answered = fsListAfter.filter(fsAfter => {
       const fsBefore = fsListBefore.find(
@@ -29,10 +29,12 @@ dotenv.config();
     });
 
     if (answered.length) {
-      answeredText = answered
+      text = answered
         .map(fs => `${fs.date} ${fs.time} ${fs.subject}のFSを回答したよ`)
         .join("\n");
     }
   }
-  notify.slack(answeredText);
+  await digicam.close();
+  console.log(`sending "${text}"`);
+  notify.slack(text);
 })();
