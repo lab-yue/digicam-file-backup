@@ -12,7 +12,7 @@ dotenv.config();
     return fs.status !== "回答済" && new Date(fs.deadline) > now;
   });
 
-  let text = `回答したFSはないようです`;
+  let text = `回答が必要なFSはないよ`;
 
   if (shouldAnwser.length) {
     await Promise.all(shouldAnwser.map(fs => digicam.fillFS(fs.url)));
@@ -33,6 +33,8 @@ dotenv.config();
         .map(fs => `${fs.date} ${fs.time} ${fs.subject}のFSを回答したよ`)
         .join("\n");
     }
+  } else {
+    text = `FSをチェックしたけど何もしなかった`;
   }
   await digicam.close();
   console.log(`sending "${text}"`);
