@@ -1,13 +1,14 @@
 import pptr from "./pptr";
 import notify from "./notify";
 import * as dotenv from "dotenv";
+
 dotenv.config();
+const { __DEV__ } = process.env;
 
 (async () => {
   const digicam = await pptr.login();
   const fsListBefore = await digicam.getFSList();
   const now = new Date();
-  console.log(fsListBefore);
   const shouldAnwser = fsListBefore.filter(fs => {
     return fs.status !== "回答済" && new Date(fs.deadline) > now;
   });
@@ -36,7 +37,9 @@ dotenv.config();
   } else {
     text = `FSをチェックしたけど何もしなかった`;
   }
-  await digicam.close();
-  console.log(`sending "${text}"`);
-  notify.slack(text);
+  if (!__DEV__) {
+    await digicam.close();
+    console.log(`sending "${text}"`);
+    notify.slack(text);
+  }
 })();

@@ -128,6 +128,7 @@ async function login() {
     await page.evaluate(() => {
       (window as any).helpers.fillFS();
     });
+    await sleep(2000);
   }
 
   async function close() {
