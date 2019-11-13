@@ -41,5 +41,6 @@ const { __DEV__ } = process.env;
     await digicam.close();
     console.log(`sending "${text}"`);
     notify.slack(text);
+    notify.discord(text);
   }
 })();
