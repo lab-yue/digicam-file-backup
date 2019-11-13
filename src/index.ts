@@ -40,7 +40,6 @@ const { __DEV__ } = process.env;
   if (!__DEV__) {
     await digicam.close();
     console.log(`sending "${text}"`);
-    notify.slack(text);
-    notify.discord(text);
+    await Promise.all([notify.slack(text), notify.discord(text)]);
   }
 })();
