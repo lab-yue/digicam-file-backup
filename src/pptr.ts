@@ -1,15 +1,30 @@
 import puppeter from "puppeteer";
-import { FS } from "../index";
+import axios from "axios";
+import path from "path";
+import fs from "fs";
+
+type DC_File = {
+  name: string;
+  url: string;
+};
+
 const URL = {
   LOGIN: "https://dh.force.com/digitalCampus/CampusLogin",
-  FS: "https://dh.force.com/digitalCampus/CampusDeliveryList?displayType=106"
+  INFO: "https://dh.force.com/digitalCampus/CampusDeliveryList?displayType=103"
 };
+
+const getLocalFiles = () =>
+  new Promise<string[]>(ok => {
+    fs.readdir(path.resolve(__dirname, "../downloads"), (err, files) => {
+      ok(files);
+    });
+  });
 
 async function sleep(sec: number) {
   return new Promise(resolve => setTimeout(resolve, sec * 1000));
 }
 
-async function login() {
+async function login(__DEV__: boolean) {
   const { DC_NAME, DC_PASSWORD } = process.env;
 
   if (!DC_NAME || !DC_PASSWORD) {
@@ -17,7 +32,7 @@ async function login() {
   }
 
   const browser = await puppeter.launch({
-    headless: true,
+    headless: false,
     args: ["--no-sandbox"]
   });
 
@@ -50,90 +65,131 @@ async function login() {
             return null;
           }
           return "https://dh.force.com" + parts[1];
-        },
-        fillFS() {
-          console.log("filling fs~");
-          const defaultOptions = {
-            name: "新規プリセット",
-            q1: "1",
-            q2: "5",
-            q3: "8",
-            q4: "12",
-            text1: "特にありません",
-            text2: "特にありません"
-          };
-          const preset = defaultOptions;
-          const selectorAnswers = [preset.q1, preset.q2, preset.q3, preset.q4];
-          const textboxs = document.querySelectorAll("textarea");
-          const next = document.querySelector(".btnNext");
-          const selectors = Array.from(document.querySelectorAll("input"));
-
-          if (textboxs) {
-            textboxs[0].textContent = preset.text1;
-            textboxs[1].textContent = preset.text2;
-          }
-
-          if (selectors.length) {
-            selectorAnswers.map(i => selectors[parseInt(i, 10)].click());
-          }
-
-          if (next) {
-            // @ts-ignore
-            next.click();
-            setTimeout(() => {
-              const next = document.querySelector(".btnNext");
-              window.confirm = () => true;
-              // @ts-ignore
-              next.click();
-            }, 1000);
-          }
         }
       };
     });
   }
 
-  async function getFSList() {
+  async function getInfoList() {
     console.log(`geting FS List`);
     const page = await browser.newPage();
-    await page.goto(URL.FS);
+    await page.goto(URL.INFO);
     await exposeHelpers(page);
 
-    const FSList: FS[] = await page.$$eval("tbody tr + tr", rows => {
+    const infoList = await page.$$eval("tbody tr + tr", rows => {
       return rows.map(row => {
-        const url: string = (window as any).helpers.getClickURL(
+        const link = (window as any).helpers.getClickURL(
           row.getAttribute("onclick")
         );
         const cells = Array.from(row.getElementsByTagName("td")).map(cell =>
           cell.innerHTML.trim()
         );
-
         return {
-          date: cells[0],
-          subject: cells[1],
-          time: cells[2],
-          deadline: cells[3],
-          status: cells[4],
-          url
+          catagroy: cells[0],
+          date: cells[1],
+          property: cells[2],
+          title: cells[3],
+          sender: cells[4],
+          status: cells[5],
+          link
         };
       });
     });
-    return FSList;
+    return infoList;
   }
 
-  async function fillFS(url: string) {
-    console.log(`filling FS`);
+  const handlePage = async (url: string) => {
     const page = await browser.newPage();
     await page.goto(url);
-    await exposeHelpers(page);
-    await page.evaluate(() => {
-      (window as any).helpers.fillFS();
+    console.log(`AT ${url}`);
+
+    async function download(file: DC_File) {
+      const filePath = path.resolve(__dirname, "../downloads", file.name);
+      const writer = fs.createWriteStream(filePath);
+      const cookies = await page.cookies();
+      const Cookie = cookies.map(c => `${c.name}=${c.value}`).join("; ");
+      console.log({ Cookie });
+      const response = await axios({
+        url: file.url,
+        method: "GET",
+        responseType: "stream",
+        headers: {
+          Cookie
+        }
+      });
+
+      response.data.pipe(writer);
+
+      return new Promise((resolve, reject) => {
+        writer.on("finish", resolve);
+        writer.on("error", reject);
+      });
+    }
+
+    const data = await page.$$eval(".infoBody td", tds => {
+      const maybeFiles = tds.pop();
+
+      const [
+        info,
+        date,
+        type,
+        available,
+        attribute,
+        _,
+        __,
+        title,
+        ___,
+        body
+      ] = tds.map(td => (td.textContent || "").trim());
+
+      const files = maybeFiles ? maybeFiles.querySelectorAll("a") : [];
+
+      const fileLinks = Array.from(files).map(a => ({
+        name: a.textContent || title,
+        url: a.href
+      }));
+
+      return {
+        info,
+        date,
+        type,
+        available,
+        attribute,
+        title,
+        body,
+        fileLinks
+      };
     });
-    await sleep(2000);
+    const localFiles = await getLocalFiles();
+    console.log(localFiles);
+    await Promise.all(
+      data.fileLinks
+        .filter(file => {
+          if (localFiles.includes(file.name)) {
+            console.log(`${file.name} skip`);
+            return false;
+          }
+          return true;
+        })
+        .map(async file => {
+          console.log(`${file.name} start`);
+          await download(file);
+          console.log(`${file.name} done`);
+        })
+    );
+    await page.close();
+    //await Promise.all(urls.map(async url => {}));
+  };
+
+  async function getFiles(urls: string[]) {
+    for (let url of urls) {
+      await handlePage(url);
+    }
   }
 
   async function close() {
     await browser.close();
   }
-  return { browser, getFSList, fillFS, close };
+  return { browser, getInfoList, getFiles, close };
 }
 export default { login, sleep };

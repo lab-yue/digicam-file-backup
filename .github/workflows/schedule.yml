@@ -1,31 +1,32 @@
-name: Auto FS
-on:
-  push:
-    branches:
-      - master
-  schedule:
-    - cron: "0 0,12 * * *"
-env:
-  TZ: Asia/Tokyo
-jobs:
-  fill-fs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10.15.0
-
-      - name: Install deps
-        run: yarn
-
-      - name: Fill fs
-        run: yarn fs
-        env:
-          DC_NAME: ${{ secrets.DC_NAME }}
-          DC_PASSWORD: ${{ secrets.DC_PASSWORD }}
-          SLACK_WEB_HOOK: ${{ secrets.SLACK_WEB_HOOK }}
+# name: Auto FS
+# on:
+#   push:
+#     branches:
+#       - master
+#   schedule:
+#     - cron: "0 0,12 * * *"
+# env:
+#   TZ: Asia/Tokyo
+# jobs:
+#   fill-fs:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v1
+#         with:
+#           fetch-depth: 1
+#
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v1
+#         with:
+#           node-version: 10.15.0
+#
+#       - name: Install deps
+#         run: yarn
+#
+#       - name: Fill fs
+#         run: yarn fs
+#         env:
+#           DC_NAME: ${{ secrets.DC_NAME }}
+#           DC_PASSWORD: ${{ secrets.DC_PASSWORD }}
+#           SLACK_WEB_HOOK: ${{ secrets.SLACK_WEB_HOOK }}
+#

@@ -6,12 +6,13 @@
   "author": "rainy-me <github@rainy.me>",
   "license": "MIT",
   "scripts": {
-    "fs": "ts-node src/index.ts"
+    "file": "ts-node src/index.ts"
   },
   "dependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/node-fetch": "^2.5.2",
     "@types/puppeteer": "^1.20.2",
+    "axios": "^0.19.0",
     "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0",
     "puppeteer": "^2.0.0",
