@@ -81,16 +81,23 @@ async function login(__DEV__: boolean) {
         const link = (window as any).helpers.getClickURL(
           row.getAttribute("onclick")
         );
-        const cells = Array.from(row.getElementsByTagName("td")).map(cell =>
+        const [
+          catagroy,
+          date,
+          property,
+          title,
+          sender,
+          status
+        ] = Array.from(row.getElementsByTagName("td")).map(cell =>
           cell.innerHTML.trim()
         );
         return {
-          catagroy: cells[0],
-          date: cells[1],
-          property: cells[2],
-          title: cells[3],
-          sender: cells[4],
-          status: cells[5],
+          catagroy,
+          date,
+          property,
+          title,
+          sender,
+          status,
           link
         };
       });
@@ -102,13 +109,12 @@ async function login(__DEV__: boolean) {
     const page = await browser.newPage();
     await page.goto(url);
     console.log(`AT ${url}`);
+    const cookies = await page.cookies();
+    const Cookie = cookies.map(c => `${c.name}=${c.value}`).join("; ");
 
     async function download(file: DC_File) {
       const filePath = path.resolve(__dirname, "../downloads", file.name);
       const writer = fs.createWriteStream(filePath);
-      const cookies = await page.cookies();
-      const Cookie = cookies.map(c => `${c.name}=${c.value}`).join("; ");
-      console.log({ Cookie });
       const response = await axios({
         url: file.url,
         method: "GET",
@@ -161,7 +167,6 @@ async function login(__DEV__: boolean) {
       };
     });
     const localFiles = await getLocalFiles();
-    console.log(localFiles);
     await Promise.all(
       data.fileLinks
         .filter(file => {
